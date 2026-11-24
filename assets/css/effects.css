@@ -1,0 +1,164 @@
+/* ==========================================================================
+   ELETROTEC — sinal elétrico, WhatsApp flutuante, estados de animação,
+   responsivo e movimento reduzido
+   ========================================================================== */
+
+/* Sinal que percorre a página como uma trilha de circuito ---------------- */
+.thread { position: absolute; top: 0; left: 0; width: 100%; height: 0; z-index: 40; pointer-events: none; }
+.thread__svg { position: absolute; top: 0; left: 0; overflow: visible; }
+.thread__path { fill: none; stroke-width: 1.5; stroke-linejoin: miter; stroke-linecap: square; }
+.thread__via { fill: var(--bg-950); stroke: rgba(92, 200, 214, 0.35); stroke-width: 1.2; transition: stroke 0.5s, fill 0.5s; }
+.thread__via.is-lit { fill: var(--cyan-400); stroke: var(--cyan-300); }
+.thread__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 2px;
+  background: #e9fbff;
+  box-shadow: 0 0 0 2px rgba(92, 200, 214, 0.55), 0 0 18px 4px rgba(92, 200, 214, 0.75);
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 0.6s var(--ease-out);
+}
+.thread__halo {
+  position: absolute;
+  inset: -10px;
+  border-radius: 4px;
+  border: 1px solid rgba(139, 227, 238, 0.8);
+  opacity: 0;
+  transform: scale(0.3) rotate(45deg);
+  transition: opacity 0.5s var(--ease-out), transform 0.7s var(--ease-out);
+}
+.thread.is-visible .thread__dot { opacity: 1; }
+.thread.is-expanded .thread__halo { opacity: 0.9; transform: scale(1) rotate(45deg); }
+.thread.is-arrived .thread__dot { opacity: 0; }
+
+/* WhatsApp flutuante ----------------------------------------------------- */
+.wa-float {
+  position: fixed;
+  right: clamp(16px, 2.4vw, 30px);
+  bottom: calc(clamp(16px, 2.4vw, 30px) + env(safe-area-inset-bottom));
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  height: 58px;
+  padding: 0 17px;
+  border-radius: 16px;
+  background: var(--grad);
+  color: var(--bg-950);
+  box-shadow: 0 18px 44px -14px rgba(10, 114, 180, 0.7), 0 0 0 1px rgba(139, 227, 238, 0.4) inset;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 130%, 0);
+  transition: transform 0.6s var(--ease-out), opacity 0.4s;
+}
+.wa-float.is-visible { opacity: 1; pointer-events: auto; transform: none; }
+.wa-float .icon { width: 24px; height: 24px; }
+.wa-float__label { max-width: 0; overflow: hidden; white-space: nowrap; font-weight: 600; font-size: 0.9rem; transition: max-width 0.5s var(--ease-out), margin 0.5s var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .wa-float:hover .wa-float__label, .wa-float:focus-visible .wa-float__label { max-width: 200px; margin-left: 0.6rem; }
+}
+.menu-open .wa-float { opacity: 0; pointer-events: none; }
+
+/* Estados iniciais das animações (só com JS + motion) -------------------- */
+.motion-ok [data-hero='eyebrow'],
+.motion-ok [data-hero='problem'],
+.motion-ok [data-hero='fade'],
+.motion-ok [data-hero='ctas'] > *,
+.motion-ok [data-hero='facts'],
+.motion-ok [data-hero='foot'] { opacity: 0; }
+.motion-ok .hero__headline .ln,
+.motion-ok [data-anim='lines'] .ln { overflow: hidden; padding: 0.06em 0.1em 0.12em 0; margin: -0.06em -0.1em -0.12em 0; }
+.motion-ok .hero__headline .ln > span,
+.motion-ok [data-anim='lines'] .ln > span { transform: translate3d(0, 115%, 0); }
+.motion-ok .is-revealed .ln { overflow: visible; }
+.motion-ok [data-anim='fade-up'] { opacity: 0; transform: translate3d(0, 26px, 0); }
+.motion-ok [data-anim='image'] { clip-path: inset(100% 0% 0% 0%); }
+.motion-ok .steps__line i { transform: scaleY(0); }
+html:not(.motion-ready) .step__num { color: var(--cyan-400); }
+html:not(.motion-ready) .step__node { background: var(--cyan-400); }
+
+/* Responsivo ------------------------------------------------------------- */
+@media (max-width: 1180px) {
+  .nav__links a { padding-inline: 0.6rem; }
+  .status--nav { display: none; }
+}
+
+@media (max-width: 1023px) {
+  :root { --nav-h: 68px; }
+  .nav__inner { grid-template-columns: 1fr auto; }
+  .nav__links { display: none; }
+  .nav__toggle { display: block; }
+
+  .hero__title { max-width: 100%; }
+  .hero__content { justify-content: flex-end; padding-top: calc(var(--nav-h) + 38vh); }
+
+  .about__grid { grid-template-columns: 1fr; }
+  .about__rail { position: absolute; left: calc(var(--gutter) / -2); top: 0; bottom: 0; background: transparent; }
+  .about__media { width: min(100%, 340px); }
+
+  .services__grid { grid-template-columns: 1fr; gap: 0; }
+  .services__stage { position: relative; height: auto; padding: 0 0 1.5rem; }
+  .services__canvas { width: min(100%, 420px, 50vh); }
+  .services__detail { display: none; }
+  .services__rail { left: calc(var(--gutter) / -2); top: 0; bottom: 0; }
+  .services__content { padding-top: 0; }
+  .svc__btn { grid-template-columns: 2.6rem minmax(0, 1fr) auto; }
+
+  .bento__card, .bento__card:nth-child(n) { grid-column: span 12; min-height: 220px; }
+
+  .steps__grid, .reviews__grid, .faq__grid, .contact__grid { grid-template-columns: 1fr; }
+  .steps__head, .reviews__score, .faq__head { position: relative; top: 0; }
+  .tips__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .section-head--split { grid-template-columns: 1fr; }
+  .contact__map { min-height: 360px; }
+  .footer__top { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 720px) {
+  .nav__cta { display: none; }
+  .brand__logo { height: 26px; }
+  .h2 { font-size: clamp(2.1rem, 9.6vw, 3rem); }
+  .hero__headline { font-size: clamp(2.7rem, 12.5vw, 4rem); }
+  .hero__ctas { flex-direction: column; align-items: stretch; }
+  .hero__ctas .btn { width: 100%; }
+  .hero__address { display: none; }
+  .specs { grid-template-columns: 1fr 1fr; }
+  .about__content .btn { width: 100%; }
+  .svc__panel-inner { padding-left: 3.6rem; }
+  .tips__grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 84%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.6rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+  }
+  .tip { scroll-snap-align: start; }
+  .faq-item__panel p { padding-right: 0; }
+  .contact__ctas .btn { width: 100%; }
+  .btn--xl { width: 100%; padding: 0 1.4rem; }
+  .footer__top { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 1024px) {
+  .svc__panel { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.force-motion) { scroll-behavior: auto; }
+  html:not(.force-motion) *,
+  html:not(.force-motion) *::before,
+  html:not(.force-motion) *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  html:not(.force-motion) .thread { display: none; }
+}
